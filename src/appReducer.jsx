@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useReducer } from "react";
 import "./app.css";
 import Counter from "./components/counter";
 import CounterReducer from "./components/counterReducer";
@@ -20,35 +20,12 @@ function countActiveUsers(users) {
   return users.filter((user) => user.active).length;
 }
 
-function App() {
-  const [inputs, setInputs] = useState({
+const initialState = {
+  inputs: {
     username: "",
     email: "",
-  });
-
-  const { username, email } = inputs;
-
-  // App component 가 리랜더링 될때마다 재생성 됨
-  // const onChange = (event) => {
-  //   const { name, value } = event.target;
-  //   setInputs({
-  //     ...inputs,
-  //     [name]: value,
-  //   });
-  // };
-
-  /**
-   * useCallback 으로 변경하여 deps 로 전달된 인자의 값이 변경되었을 경우에만 호출
-   */
-  const onChange = useCallback((event) => {
-    const { name, value } = event.target;
-    setInputs((inputs) => ({
-      ...inputs,
-      [name]: value,
-    }));
-  }, []);
-
-  const [users, setUsers] = useState([
+  },
+  users: [
     {
       id: 1,
       username: "velopert",
@@ -67,7 +44,67 @@ function App() {
       email: "liz@example.com",
       active: false,
     },
-  ]);
+  ],
+};
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "CHANGE_INPUT":
+      return {
+        ...state,
+        inputs: {
+          ...state.inputs,
+          [action.name]: action.value,
+        },
+      };
+    case "CREATE_USER":
+      return {
+        // inputs: initialState.inputs,
+        ...state, // 위와 같은 표현
+        users: state.users.concat(action.user),
+      };
+    case "REMOVE_USER":
+      return {
+        ...state,
+        users: state.users.filter((user) => user.id !== action.id),
+      };
+    case "TOGGLE_USER":
+      return {
+        ...state,
+        users: state.users.map((user) =>
+          user.id === action.id ? { ...user, active: !user.active } : user
+        ),
+      };
+    default:
+      return state;
+  }
+}
+
+function AppReducer() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { users } = state;
+  const { username, email } = state.inputs;
+
+  // App component 가 리랜더링 될때마다 재생성 됨
+  // const onChange = (event) => {
+  //   const { name, value } = event.target;
+  //   setInputs({
+  //     ...inputs,
+  //     [name]: value,
+  //   });
+  // };
+
+  /**
+   * useCallback 으로 변경하여 deps 로 전달된 인자의 값이 변경되었을 경우에만 호출
+   */
+  const onChange = useCallback((event) => {
+    const { name, value } = event.target;
+    dispatch({
+      type: "CHANGE_INPUT",
+      name,
+      value,
+    });
+  }, []);
 
   const nextId = useRef(4);
 
@@ -75,19 +112,13 @@ function App() {
    * useCallback 으로 변경
    */
   const onCreate = useCallback(() => {
-    console.log("onCreate called~!");
-
-    const user = {
-      id: nextId.current,
-      username,
-      email,
-    };
-    // setUsers([...users, user]);
-    setUsers((users) => users.concat(user));
-
-    setInputs({
-      username: "",
-      email: "",
+    dispatch({
+      type: "CREATE_USER",
+      user: {
+        id: nextId.current,
+        username,
+        email,
+      },
     });
     nextId.current += 1;
   }, [username, email]);
@@ -97,29 +128,21 @@ function App() {
    * @param {*} id
    */
   const onRemove = useCallback((id) => {
-    setUsers((users) => users.filter((user) => user.id !== id));
+    dispatch({
+      type: "REMOVE_USER",
+      id,
+    });
   }, []);
-
-  /**
-   * useCallback 의 2번째 인자(deps)에 users 를 전달하여 users가 변경될 경우에만 호출
-   */
-  // const onToggle = useCallback((id) => {
-  //   setUsers(users.map((user) => user.id === id ? { ...user, active: !user.active } : user))
-  // }, [users]);
 
   /**
    * setUsers 안에서 함수형으로 users를 전달받아 자체적으로 처리, useCallback 호출 시 2번째 인자 필요없음.
    */
   const onToggle = useCallback((id) => {
-    setUsers((users) =>
-      users.map((user) =>
-        user.id === id ? { ...user, active: !user.active } : user
-      )
-    );
+    dispatch({
+      type: "TOGGLE_USER",
+      id,
+    });
   }, []);
-
-  // 아래 코드는 CreateUser component 로 전달 된 input tag의 값이 변해도 호출
-  // const count = countActiveUsers(users);
 
   //useMemo Hook 사용하여 성능 개선
   // deps 로 전달한 객체가 변경되었을 경우 첫번째 function 호출
@@ -169,4 +192,4 @@ function App() {
   );
 }
 
-export default App;
+export default AppReducer;
