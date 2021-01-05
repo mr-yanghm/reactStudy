@@ -9,6 +9,7 @@ import InputSample from "./components/inputSample";
 import InputsSample from "./components/inputsSample";
 import UserList from "./components/userList";
 import Wrapper from "./components/wrapper";
+import useInputs from "./Hooks/useInputs";
 
 /**
  * active 된 user의 수를 반환
@@ -81,32 +82,14 @@ function reducer(state, action) {
 }
 
 function AppReducer() {
+  const [{ username, email }, onChange, reset] = useInputs({
+    username: "",
+    email: "",
+  });
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { users } = state;
-  const { username, email } = state.inputs;
-
-  // App component 가 리랜더링 될때마다 재생성 됨
-  // const onChange = (event) => {
-  //   const { name, value } = event.target;
-  //   setInputs({
-  //     ...inputs,
-  //     [name]: value,
-  //   });
-  // };
-
-  /**
-   * useCallback 으로 변경하여 deps 로 전달된 인자의 값이 변경되었을 경우에만 호출
-   */
-  const onChange = useCallback((event) => {
-    const { name, value } = event.target;
-    dispatch({
-      type: "CHANGE_INPUT",
-      name,
-      value,
-    });
-  }, []);
-
   const nextId = useRef(4);
+
+  const { users } = state;
 
   /**
    * useCallback 으로 변경
@@ -120,8 +103,9 @@ function AppReducer() {
         email,
       },
     });
+    reset();
     nextId.current += 1;
-  }, [username, email]);
+  }, [username, email, reset]);
 
   /**
    * useCallback 으로 변경
@@ -172,7 +156,7 @@ function AppReducer() {
       <li>
         <Title
           title={
-            "state를 부모에서 만들어 props로 전달하면서 state 핸들링 <배열에 항목 추가>"
+            "state를 부모에서 만들어 props로 전달하면서 state 핸들링 <배열에 항목 추가 & Reducer 적용>"
           }
         />
         <CreateUser
