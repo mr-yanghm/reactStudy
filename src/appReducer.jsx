@@ -154,6 +154,10 @@ function AppReducer() {
         <InputsSample />
       </li>
       <li>
+        <Title title={"counter reducer 예제"} />
+        <CounterReducer />
+      </li>
+      <li>
         <Title
           title={
             "state를 부모에서 만들어 props로 전달하면서 state 핸들링 <배열에 항목 추가 & Reducer 적용>"
@@ -167,10 +171,6 @@ function AppReducer() {
         />
         <UserList users={users} onRemove={onRemove} onToggle={onToggle} />
         <div>활성사용자 수 : {count}</div>
-      </li>
-      <li>
-        <Title title={"counter reducer 예제"} />
-        <CounterReducer />
       </li>
     </ol>
   );
