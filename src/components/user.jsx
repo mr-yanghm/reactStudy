@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 
-const User = React.memo(({ user, onRemove, onToggle }) => {
+const User = React.memo(({ user }) => {
+    const dispatch = useContext(UserDispatch);
     /**
      * useEffect 에 전달하는 인자는 function, [deps] 인데, function 안에서 return 하는 cleanip function 은 deps 가 비어있을 경우 컴포넌트가 사라질때 호출
      */
@@ -39,10 +40,10 @@ const User = React.memo(({ user, onRemove, onToggle }) => {
             <b style={{
                 cursor: 'pointer',
                 color: user.active ? 'green' : 'black'
-            }} onClick={() => onToggle(user.id)}>{user.username}</b> <span>({user.email})</span>
+            }} onClick={() => dispatch({ type: "TOGGLE_USER", id: user.id })}>{user.username}</b> <span>({user.email})</span>
             {/* 아래처럼 function 안에 callback 으로 전달할 경우 화살표 함수를 이용하여 한번 감싸서 전달한다. */}
             {/* <button onClick={onRemove(user.id)}>삭제</button> */}
-            <button onClick={() => onRemove(user.id)}>삭제</button>
+            <button onClick={() => dispatch({ type: "REMOVE_USER", id: user.id })}>삭제</button>
         </div>
     )
 });

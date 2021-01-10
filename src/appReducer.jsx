@@ -81,6 +81,8 @@ function reducer(state, action) {
   }
 }
 
+export const UserDispatch = React.createContext(null);
+
 function AppReducer() {
   const [{ username, email }, onChange, reset] = useInputs({
     username: "",
@@ -106,27 +108,6 @@ function AppReducer() {
     reset();
     nextId.current += 1;
   }, [username, email, reset]);
-
-  /**
-   * useCallback 으로 변경
-   * @param {*} id
-   */
-  const onRemove = useCallback((id) => {
-    dispatch({
-      type: "REMOVE_USER",
-      id,
-    });
-  }, []);
-
-  /**
-   * setUsers 안에서 함수형으로 users를 전달받아 자체적으로 처리, useCallback 호출 시 2번째 인자 필요없음.
-   */
-  const onToggle = useCallback((id) => {
-    dispatch({
-      type: "TOGGLE_USER",
-      id,
-    });
-  }, []);
 
   //useMemo Hook 사용하여 성능 개선
   // deps 로 전달한 객체가 변경되었을 경우 첫번째 function 호출
@@ -163,14 +144,16 @@ function AppReducer() {
             "state를 부모에서 만들어 props로 전달하면서 state 핸들링 <배열에 항목 추가 & Reducer 적용>"
           }
         />
-        <CreateUser
-          username={username}
-          email={email}
-          onChange={onChange}
-          onCreate={onCreate}
-        />
-        <UserList users={users} onRemove={onRemove} onToggle={onToggle} />
-        <div>활성사용자 수 : {count}</div>
+        <UserDispatch.Provider value={dispatch}>
+          <CreateUser
+            username={username}
+            email={email}
+            onChange={onChange}
+            onCreate={onCreate}
+          />
+          <UserList users={users} />
+          <div>활성사용자 수 : {count}</div>
+        </UserDispatch.Provider>
       </li>
     </ol>
   );
