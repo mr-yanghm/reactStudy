@@ -61,7 +61,7 @@ function reducer(state, action) {
     case "CREATE_USER":
       return {
         // inputs: initialState.inputs,
-        ...state, // 위와 같은 표현
+        // ...state, // 위와 같은 표현
         users: state.users.concat(action.user),
       };
     case "REMOVE_USER":
@@ -92,22 +92,6 @@ function AppReducer() {
   const nextId = useRef(4);
 
   const { users } = state;
-
-  /**
-   * useCallback 으로 변경
-   */
-  const onCreate = useCallback(() => {
-    dispatch({
-      type: "CREATE_USER",
-      user: {
-        id: nextId.current,
-        username,
-        email,
-      },
-    });
-    reset();
-    nextId.current += 1;
-  }, [username, email, reset]);
 
   //useMemo Hook 사용하여 성능 개선
   // deps 로 전달한 객체가 변경되었을 경우 첫번째 function 호출
@@ -145,12 +129,7 @@ function AppReducer() {
           }
         />
         <UserDispatch.Provider value={dispatch}>
-          <CreateUser
-            username={username}
-            email={email}
-            onChange={onChange}
-            onCreate={onCreate}
-          />
+          <CreateUser />
           <UserList users={users} />
           <div>활성사용자 수 : {count}</div>
         </UserDispatch.Provider>
