@@ -1,5 +1,10 @@
 import { useCallback, useReducer } from "react";
 
+/**
+ * branch test
+ * @param {*} state 
+ * @param {*} action 
+ */
 function reducer(state, action) {
   switch (action.type) {
     case 'CHANGE':
